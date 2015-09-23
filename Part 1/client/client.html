@@ -17,17 +17,26 @@
 		
 		username = document.querySelector("#username").value;
 		
-		socket.on('connect',function(){
+		socket.on('connect',function(data){
 			
 			if(!user){
 				user = "Unknown";
 			}
 			
 			socket.emit('join',{name:user});
+			setInterval(updateScore,1300);
+		});
+		
+		socket.on('countUpdate',function(data){
+			document.querySelector("#numberCount").innerHTML = data.count; 
 		});
 	}
 	
-	
+	function updateScore(){
+		var num = Math.random() * 100;
+		
+		socket.emit('addToCount', {name:username,count:num});
+	}
 </script>
 
 <html lang="en">

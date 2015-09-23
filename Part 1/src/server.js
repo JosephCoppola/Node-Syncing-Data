@@ -9,9 +9,11 @@ var app = http.createServer(onRequest).listen(port);
 
 console.log("Listening on 127.0.0.1: " + port);
 
-var user = {};
+var users = {};
 
 var io = socketio(app);
+
+var serverCount = 0;
 
 //HTTP
 function onRequest(request, response)
@@ -33,12 +35,29 @@ var onJoined = function(socket){
 	//Setting EventListener for join
 	socket.on("join",function(data){
 		
+		var userName = data.name;
+		var key = socket.id;
+		socket.username = userName;
+		
+		users[key] = socket;
+		
+		socket.join('room1');
+		
+		socket.emit("countUpdate",{count:serverCount});
 	});
 };
 
 var onDisconnect = function(socket){
 	socket.on('disconnect',function(data){
 		
+	});
+}
+
+var onAddToCount = function(socket){
+	socket.on('addToCount',function(data){
+		serverCount += data.count;
+		
+		socket.broadcast.to('room1').emit('countUpdate',{name:data.name,count:serverCount});
 	});
 }
 
