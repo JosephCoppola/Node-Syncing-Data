@@ -1,0 +1,12 @@
+{
+  "name": "nodesyncpart1",
+  "version": "1.0.0",
+  "description": "Part 1 of Node HW",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \\\"Test complete\\\"",
+    "start": "node server.js"
+  },
+  "author": "Joe",
+  "license": "ISC"
+}
