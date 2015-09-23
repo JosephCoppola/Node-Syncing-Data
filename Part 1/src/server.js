@@ -28,12 +28,14 @@ io.sockets.on("connection",function(socket){
 	//Call these functions to hook up listener events
 	onJoined(socket);
 	onDisconnect(socket);
+	onAddToCount(socket);
 });
 
 //When a new socket joins
 var onJoined = function(socket){
 	//Setting EventListener for join
 	socket.on("join",function(data){
+		console.log(data.name + " just joined");
 		
 		var userName = data.name;
 		var key = socket.id;
@@ -49,15 +51,17 @@ var onJoined = function(socket){
 
 var onDisconnect = function(socket){
 	socket.on('disconnect',function(data){
-		
+		serverCount -= 100;
 	});
 }
 
 var onAddToCount = function(socket){
 	socket.on('addToCount',function(data){
+		console.log(data.name + " added " + data.count);
+		
 		serverCount += data.count;
 		
-		socket.broadcast.to('room1').emit('countUpdate',{name:data.name,count:serverCount});
+		io.sockets.in('room1').emit('countUpdate',{name:data.name,serverNumber:serverCount});
 	});
 }
 

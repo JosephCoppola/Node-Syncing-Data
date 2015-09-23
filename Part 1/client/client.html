@@ -3,6 +3,7 @@
 <script>
 	var socket;
 	var username;
+	var divs = [];
 	
 	window.onload = init;
 	
@@ -19,16 +20,20 @@
 		
 		socket.on('connect',function(data){
 			
-			if(!user){
-				user = "Unknown";
+			if(!username){
+				username = "Unknown";
 			}
 			
-			socket.emit('join',{name:user});
-			setInterval(updateScore,1300);
+			console.log("Connected");
+			
+			socket.emit('join',{name:username});
+			setInterval(updateScore,2000);
 		});
 		
 		socket.on('countUpdate',function(data){
-			document.querySelector("#numberCount").innerHTML = data.count; 
+			console.log("Updating count " + data.serverNumber);
+			document.querySelector("#numberCount").innerHTML = data.serverNumber;
+			document.querySelector("#counter").innerHTML = "<section>Hi</section>";
 		});
 	}
 	
@@ -42,7 +47,11 @@
 <html lang="en">
 	<head>
 		<style>
-		
+			#counter{
+				margin: 0 auto;
+    			width: 270px;
+				text-align: center;
+			}
 		</style>
 	</head>
 	<body>
