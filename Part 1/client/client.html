@@ -1,6 +1,32 @@
 <script src = "/socket.io/socket.io.js"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
 <script>
+	var socket;
+	var username;
+	
+	window.onload = init;
+	
+	function init(){
+		
+		document.querySelector("#connect").addEventListener('click',connectSocket);
+	}
+	
+	function connectSocket(e){
+
+		socket = io.connect();
+		
+		username = document.querySelector("#username").value;
+		
+		socket.on('connect',function(){
+			
+			if(!user){
+				user = "Unknown";
+			}
+			
+			socket.emit('join',{name:user});
+		});
+	}
+	
 	
 </script>
 
@@ -11,9 +37,14 @@
 		</style>
 	</head>
 	<body>
+		<section id = "login">
+			<label for="user">Username:</label>
+			<input id = "username" name="user" type = "text"/>
+			<input id = "connect" type="button" value = "Join Counter"/>
+		</section>
 		<section id = "counter">
 			<p>Counter:</p>
-			<p id = "numberCount"></p>
+			<p id = "numberCount">0</p>
 		</section>
 	</body>
 </html>
