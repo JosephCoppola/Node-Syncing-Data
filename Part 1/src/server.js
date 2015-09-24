@@ -45,7 +45,9 @@ var onJoined = function(socket){
 		
 		socket.join('room1');
 		
-		socket.emit("countUpdate",{count:serverCount});
+		var message = "Welcome to Joe's Counter";
+		
+		socket.emit("countUpdate",{name:data.name,serverNumber:serverCount,msg:message});
 	});
 };
 
@@ -61,7 +63,9 @@ var onAddToCount = function(socket){
 		
 		serverCount += data.count;
 		
-		io.sockets.in('room1').emit('countUpdate',{name:data.name,serverNumber:serverCount});
+		var message = data.name + " added " + data.count;
+		
+		io.sockets.in('room1').emit('countUpdate',{name:data.name,serverNumber:serverCount,msg:message});
 	});
 }
 
