@@ -12,12 +12,15 @@
 	function init(){
 		
 		connectButton = document.querySelector("#connect");
-		connectButton.addEventListener('click',connectSocket);
+		connectButton.onclick = connectSocket;
 	}
 	
 	function connectSocket(e){
-
-		socket = io.connect();
+		
+		if(socket == null)
+		{
+			socket = io.connect();
+		}
 		
 		username = document.querySelector("#username").value;
 		
@@ -31,8 +34,9 @@
 			
 			socket.emit('join',{name:username});
 			setInterval(updateScore,2000);
-			connectButton.removeEventListener('click');
-			connectButton.addEventListener('click',disconnectSocket);
+			//connectButton.removeEventListener('click');
+			//connectButton.addEventListener('click',disconnectSocket);
+			connectButton.onclick = disconnectSocket;
 			connectButton.value = "Disconnect";
 		});
 		
@@ -70,8 +74,7 @@
 	
 	function disconnectSocket(){
 		socket.disconnect();
-		connectButton.addEventListener('click',connectSocket);
-		connectButton.value = "Join Counter";
+		connectButton.remove();
 	}
 	
 </script>

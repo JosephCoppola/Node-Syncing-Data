@@ -56,6 +56,8 @@ var onDisconnect = function(socket){
 		serverCount -= 100;
 		var message = socket.username + " has left the room -100!";
 		io.sockets.in('room1').emit('notify',{name:data.name,serverNumber:serverCount,msg:message});
+		var key = users.indexOf(socket.id);
+		users.splice(key,1);
 	});
 }
 
