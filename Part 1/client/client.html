@@ -15,6 +15,7 @@
 		connectButton.onclick = connectSocket;
 	}
 	
+	//Button event listener for join counter
 	function connectSocket(e){
 		
 		if(socket == null)
@@ -54,6 +55,7 @@
 		});
 	}
 	
+	//Delete the div when it's opacity hits 0
 	var removeDiv = function()
 	{
 		for(i = 0; i< divs.length;i++)
@@ -66,12 +68,14 @@
 		}
 	}
 	
+	//Update the score by getting an random amount and sending to the server
 	function updateScore(){
 		var num = parseInt((Math.random() * 100));
 		
 		socket.emit('addToCount', {name:username,count:num});
 	}
 	
+	//Disconnect the socket (Button on click listener)	
 	function disconnectSocket(){
 		socket.disconnect();
 		connectButton.remove();

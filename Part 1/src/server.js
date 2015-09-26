@@ -51,6 +51,7 @@ var onJoined = function(socket){
 	});
 };
 
+//On disconnect delete the user from the array and subtract from the global score
 var onDisconnect = function(socket){
 	socket.on('disconnect',function(data){
 		serverCount -= 100;
