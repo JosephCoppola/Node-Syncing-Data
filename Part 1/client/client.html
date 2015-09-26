@@ -5,12 +5,14 @@
 	var username;
 	var divs = [];
 	var notifyCounter = 0;
+	var connectButton;
 	
 	window.onload = init;
 	
 	function init(){
 		
-		document.querySelector("#connect").addEventListener('click',connectSocket);
+		connectButton = document.querySelector("#connect");
+		connectButton.addEventListener('click',connectSocket);
 	}
 	
 	function connectSocket(e){
@@ -29,32 +31,33 @@
 			
 			socket.emit('join',{name:username});
 			setInterval(updateScore,2000);
+			connectButton.removeEventListener('click');
+			connectButton.addEventListener('click',disconnectSocket);
+			connectButton.value = "Disconnect";
 		});
 		
-		socket.on('countUpdate',function(data){
-			console.log("Updating count " + data.serverNumber);
+		socket.on('notify',function(data){
+			notifyCounter++;
+			//console.log("Updating count " + data.serverNumber);
 			document.querySelector("#numberCount").innerHTML = data.serverNumber;
 
-			document.querySelector("#counter").innerHTML += "<section id = \"notify" + notifyCounter + "\" class = \"notifacation\">" + data.msg + "</section>";
+			$("#counter").append("<div id = \"notify" + notifyCounter + "\" class = \"notifacation\">" + data.msg + "</div>");
 			
 			var selector = "#notify" + notifyCounter;
-			notifyCounter++;
 			divs.push(selector);
 			
-			$(selector).animate({bottom:"+=100px",opacity:"0.0"},{duration: 1200, queue: false, complete:removeDiv});
+			$(selector).animate({bottom:"+=100px",opacity:"0.0"},{duration: 1200, queue: true, complete:removeDiv});
 		});
 	}
 	
 	var removeDiv = function()
 	{
-		console.log("TEST");
 		for(i = 0; i< divs.length;i++)
 		{
 			if($(divs[i]).css("opacity") == 0.0)
 			{
 				$(divs[i]).remove();
 				divs.splice(i,1);
-				notifyCounter--;
 			}
 		}
 	}
@@ -64,6 +67,13 @@
 		
 		socket.emit('addToCount', {name:username,count:num});
 	}
+	
+	function disconnectSocket(){
+		socket.disconnect();
+		connectButton.addEventListener('click',connectSocket);
+		connectButton.value = "Join Counter";
+	}
+	
 </script>
 
 <html lang="en">
@@ -73,13 +83,15 @@
 				margin: 100px auto;
     			width: 270px;
 				text-align: center;
+				font-size: 5vw;
 			}
 			.notifacation{
 				margin: 0 auto;
     			width: 270px;
-				bottom: 70%;
+				bottom: 85%;
 				text-align: center;
 				position: absolute;
+				font-size: 20px;
 			}
 		</style>
 	</head>

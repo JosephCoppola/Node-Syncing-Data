@@ -47,13 +47,15 @@ var onJoined = function(socket){
 		
 		var message = "Welcome to Joe's Counter";
 		
-		socket.emit("countUpdate",{name:data.name,serverNumber:serverCount,msg:message});
+		socket.emit("notify",{name:data.name,serverNumber:serverCount,msg:message});
 	});
 };
 
 var onDisconnect = function(socket){
 	socket.on('disconnect',function(data){
 		serverCount -= 100;
+		var message = socket.username + " has left the room -100!";
+		io.sockets.in('room1').emit('notify',{name:data.name,serverNumber:serverCount,msg:message});
 	});
 }
 
@@ -65,7 +67,7 @@ var onAddToCount = function(socket){
 		
 		var message = data.name + " added " + data.count;
 		
-		io.sockets.in('room1').emit('countUpdate',{name:data.name,serverNumber:serverCount,msg:message});
+		io.sockets.in('room1').emit('notify',{name:data.name,serverNumber:serverCount,msg:message});
 	});
 }
 
