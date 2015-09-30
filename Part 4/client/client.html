@@ -10,16 +10,21 @@
 	
 	window.onload = init;
 	
+	//On window load call this
 	function init(){
+		//Get canvas and ctx handle
 		canvas = document.querySelector('#mainCanvas');
 		ctx = canvas.getContext('2d');
+		//Hook up mouse event listeners
 		canvas.onmousedown = doMousedown;
 		canvas.onmousemove = doMousemove;
 		canvas.onmouseup = doMouseup;
+		//Connect the socket
 		connectSocket();
 		doClear();
 	}
 
+	//Connect the socket
 	function connectSocket(){
 	
 		if(socket == null)
@@ -28,38 +33,49 @@
 		}
 		
 		socket.on('connect',function(data){
-			
-			console.log("Connected");
-			
+			console.log("connected");
 		});
 		
-		socket.on('addToDrawStack',function(data){
-			console.log("Adding to draw stack");
-			draws[data.timeStamp] = data;
-			draw();
+		//Event listener for drawImage msg from server
+		socket.on('drawImage',function(data){
+			var image = new Image();
+			
+			//Create an image from the server stream
+			image.onload = function() {
+				ctx.save();
+                ctx.fillStyle = "#000000";
+				ctx.globalCompositeOperation = "source-over"; //this is default for canvas
+				ctx.drawImage(image, data.x, data.y, data.width, data.height);
+				ctx.restore();
+			};
+				
+			//Set the image source
+			image.src = data.imgData;
 		});
 	}
 	
-	function draw()
- 	{
- 		doClear();
-		var keys = Object.keys(draws);
-
-		for(var i = 0; i < keys.length; i++)
- 		{
- 			var drawCall = draws[ keys[i] ];
-			 
-			 if(drawCall.id == socket.id)
-			 {
-			 	ctx.fillStyle = "#FF0000";
-			 }
-			 else
-			 {
-				 ctx.fillStyle = "#000000";
-			 }
-			 
-			ctx.fillRect(drawCall.x, drawCall.y,10,10);
- 		}
+	//Called whenever a user clicks. 
+	function createAndSendImage(mouse)
+	{
+		//Create a buffer canvas
+		sendBufferCanvas = document.createElement("canvas");
+		sendBufferCanvas.height = 200;
+		sendBufferCanvas.width = 200;
+		sendBufferCtx = sendBufferCanvas.getContext("2d");
+		ctx.fillStyle = "#FF0000";
+		//Draw the image on the local client
+		ctx.fillRect(mouse.x, mouse.y, 200, 200); 
+		sendBufferCtx.fillRect(0,0,200,200); //draw to hidden buffer
+		//Construct the image data json to stream
+		var imgData = {
+			x: mouse.x,
+			y: mouse.y,
+			height: 200,
+			width: 200,
+			imgData: sendBufferCanvas.toDataURL() //get pixel data from canvas
+		};
+		//Stream to Server
+		socket.emit("recieveImageStream", imgData);	
 	}
 
 	// EVENT CALLBACK FUNCTIONS
@@ -70,21 +86,14 @@
 	}
 	
 	function doMouseup(e) {
-		console.log(e.type);
-		dragging = false;
+		var mouse = getMouse(e);
+		createAndSendImage(mouse);
 	}
  
  	function doMousemove(e) {
- 		
-		if(!dragging) return;
-		
-		var mouse = getMouse(e);
-		//ctx.fillStyle = "#000000";
-		//ctx.fillRect(mouse.x,mouse.y,10,10);
-		
-		socket.emit("draw",{x:mouse.x,y:mouse.y});
+ 	
 	}
-	
+	//HELPER FUNCTIONS
 	function doClear(){
 		ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 		ctx.fillStyle = "#DCDCDC";
@@ -108,7 +117,6 @@
 	<body>
 		<section id = "main">
 			<canvas id="mainCanvas" width="700" height="500">
-	
 			</canvas>
 		</section>
 	</body>

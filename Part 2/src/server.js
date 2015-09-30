@@ -38,6 +38,7 @@ var onDraw = function(socket){
 		
 		var time = new Date().getTime();
 		
+		//Construct draw call object
 		drawParams.x = data.x;
 		drawParams.y = data.y;
 		drawParams.id = socket.id;

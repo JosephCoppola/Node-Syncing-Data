@@ -25,25 +25,17 @@ function onRequest(request, response)
 io.sockets.on("connection",function(socket){
 	//Call these functions to hook up listener events
 	console.log("New connection");
-	onDraw(socket);
+	OnImageStreamRecieve(socket);
 	onDisconnect(socket);
 	
 	socket.join('room1');
 });
 
-var onDraw = function(socket){
+var OnImageStreamRecieve = function(socket){
 	//Setting EventListener for draw
-	socket.on("draw",function(data){
-		var drawParams = {};
-		
-		var time = new Date().getTime();
-		
-		drawParams.x = data.x;
-		drawParams.y = data.y;
-		drawParams.id = socket.id;
-		drawParams.timeStamp = time;
-		
-		io.sockets.in('room1').emit('addToDrawStack',drawParams);
+	socket.on("recieveImageStream",function(data){
+		//Stream to clients 
+		socket.broadcast.to("room1").emit("drawImage",data);
 	});
 };
 
