@@ -1,6 +1,7 @@
 <script src = "/socket.io/socket.io.js"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
 <script>
+	//Globals
 	var socket;
 	var username;
 	var canvas;
@@ -8,64 +9,92 @@
 	var draws = {};
 	var dragging;
 	
+	//Fire JS on window load
 	window.onload = init;
 	
+	//Get a handle on the canvas and set up mouse listener events
 	function init(){
 		canvas = document.querySelector('#mainCanvas');
 		ctx = canvas.getContext('2d');
+		//Hook up canvas and mouse event listeners
 		canvas.onmousedown = doMousedown;
 		canvas.onmousemove = doMousemove;
 		canvas.onmouseup = doMouseup;
+		//Connect the socket
 		connectSocket();
+		//Draw the first frame
 		doClear();
 	}
 
+	//Initalize the socket to server
 	function connectSocket(){
 	
 		if(socket == null)
 		{
+			//Connect socket
 			socket = io.connect();
 		}
 		
+		//Connected Event listener
 		socket.on('connect',function(data){
 			
 			console.log("Connected");
-			
+			//Send initial values to the server
+			socket.emit('joined',{id:socket.id,x:0,y:0,timeStamp:-1});
 		});
 		
-		socket.on('addToDrawStack',function(data){
-			console.log("Adding to draw stack");
-			draws[data.timeStamp] = data;
+		//Event Listener for other players movements
+		socket.on('updateDraw',function(data){
+			
+			//Validates packet
+			if(data.timeStamp > draws[data.id].timeStamp)
+			{
+				draws[data.id] = data;
+			}
+			
+			//Updates client screen
+			draw();
+		});
+		
+		//Adds to the client's known users
+		socket.on('addToStack',function(data){
+			draws[data.id] = data;
+		});
+		
+		//Syncs the client's draws stack with the servers
+		socket.on('syncStack',function(data){
+			draws = data;
+			//Update the client screen with new draws stack data
 			draw();
 		});
 	}
 	
+	//Draw the client canvas
 	function draw()
  	{
+		//Clear sceen
  		doClear();
+		//Get keys of draws
 		var keys = Object.keys(draws);
-
+		
 		for(var i = 0; i < keys.length; i++)
  		{
- 			var drawCall = draws[ keys[i] ];
-			 
-			 if(drawCall.id == socket.id)
-			 {
-			 	ctx.fillStyle = "#FF0000";
-			 }
-			 else
-			 {
-				 ctx.fillStyle = "#000000";
-			 }
-			 
-			ctx.fillRect(drawCall.x, drawCall.y,10,10);
+			//Don't draw self
+			if(draws[keys[i]].id != socket.id)
+			{
+				//Draw a red rect
+				var drawCall = draws[ keys[i] ];
+	
+				ctx.fillStyle = "#FF0000";
+				
+				ctx.fillRect(drawCall.x, drawCall.y,10,10);
+			}
  		}
 	}
 
 	// EVENT CALLBACK FUNCTIONS
 	function doMousedown(e){
 		console.log(e.type);
-		
 		dragging = true;
 	}
 	
@@ -75,16 +104,12 @@
 	}
  
  	function doMousemove(e) {
- 		
-		if(!dragging) return;
-		
 		var mouse = getMouse(e);
-		//ctx.fillStyle = "#000000";
-		//ctx.fillRect(mouse.x,mouse.y,10,10);
-		
+
 		socket.emit("draw",{x:mouse.x,y:mouse.y});
 	}
 	
+	// HELPER FUNCTIONS
 	function doClear(){
 		ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 		ctx.fillStyle = "#DCDCDC";
@@ -108,7 +133,6 @@
 	<body>
 		<section id = "main">
 			<canvas id="mainCanvas" width="700" height="500">
-	
 			</canvas>
 		</section>
 	</body>
