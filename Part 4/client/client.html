@@ -1,0 +1,115 @@
+<script src = "/socket.io/socket.io.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+<script>
+	var socket;
+	var username;
+	var canvas;
+	var ctx;
+	var draws = {};
+	var dragging;
+	
+	window.onload = init;
+	
+	function init(){
+		canvas = document.querySelector('#mainCanvas');
+		ctx = canvas.getContext('2d');
+		canvas.onmousedown = doMousedown;
+		canvas.onmousemove = doMousemove;
+		canvas.onmouseup = doMouseup;
+		connectSocket();
+		doClear();
+	}
+
+	function connectSocket(){
+	
+		if(socket == null)
+		{
+			socket = io.connect();
+		}
+		
+		socket.on('connect',function(data){
+			
+			console.log("Connected");
+			
+		});
+		
+		socket.on('addToDrawStack',function(data){
+			console.log("Adding to draw stack");
+			draws[data.timeStamp] = data;
+			draw();
+		});
+	}
+	
+	function draw()
+ 	{
+ 		doClear();
+		var keys = Object.keys(draws);
+
+		for(var i = 0; i < keys.length; i++)
+ 		{
+ 			var drawCall = draws[ keys[i] ];
+			 
+			 if(drawCall.id == socket.id)
+			 {
+			 	ctx.fillStyle = "#FF0000";
+			 }
+			 else
+			 {
+				 ctx.fillStyle = "#000000";
+			 }
+			 
+			ctx.fillRect(drawCall.x, drawCall.y,10,10);
+ 		}
+	}
+
+	// EVENT CALLBACK FUNCTIONS
+	function doMousedown(e){
+		console.log(e.type);
+		
+		dragging = true;
+	}
+	
+	function doMouseup(e) {
+		console.log(e.type);
+		dragging = false;
+	}
+ 
+ 	function doMousemove(e) {
+ 		
+		if(!dragging) return;
+		
+		var mouse = getMouse(e);
+		//ctx.fillStyle = "#000000";
+		//ctx.fillRect(mouse.x,mouse.y,10,10);
+		
+		socket.emit("draw",{x:mouse.x,y:mouse.y});
+	}
+	
+	function doClear(){
+		ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+		ctx.fillStyle = "#DCDCDC";
+		ctx.fillRect(0,0,ctx.canvas.width,ctx.canvas.height);
+	}
+	
+	function getMouse(e){
+		var mouse = {}
+		mouse.x = e.pageX - e.target.offsetLeft;
+		mouse.y = e.pageY - e.target.offsetTop;
+		return mouse;
+	}
+</script>
+
+<html lang="en">
+	<head>
+		<style>
+
+		</style>
+	</head>
+	<body>
+		<section id = "main">
+			<canvas id="mainCanvas" width="700" height="500">
+	
+			</canvas>
+		</section>
+	</body>
+</html>
