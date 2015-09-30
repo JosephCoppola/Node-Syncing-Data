@@ -47,12 +47,14 @@ var onJoined = function(socket){
 		
 		var message = "Welcome to Joe's Counter";
 		
+		//Send a notification to the user
 		socket.emit("notify",{name:data.name,serverNumber:serverCount,msg:message});
 	});
 };
 
 //On disconnect delete the user from the array and subtract from the global score
 var onDisconnect = function(socket){
+	//Hook up event listener
 	socket.on('disconnect',function(data){
 		serverCount -= 100;
 		var message = socket.username + " has left the room -100!";
@@ -62,7 +64,9 @@ var onDisconnect = function(socket){
 	});
 }
 
+//Event Listener for addToCount msg from client
 var onAddToCount = function(socket){
+	//Hook up event listener
 	socket.on('addToCount',function(data){
 		console.log(data.name + " added " + data.count);
 		
@@ -70,6 +74,7 @@ var onAddToCount = function(socket){
 		
 		var message = data.name + " added " + data.count;
 		
+		//Notify the room of the increment
 		io.sockets.in('room1').emit('notify',{name:data.name,serverNumber:serverCount,msg:message});
 	});
 }

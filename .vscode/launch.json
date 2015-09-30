@@ -9,7 +9,7 @@
 			// Type of configuration. Possible values: "node", "mono".
 			"type": "node",
 			// Workspace relative or absolute path to the program.
-			"program": "C:/Users/josep/Documents/Node-Syncing-Data/Part 3/src/server.js",
+			"program": "C:/Users/josep/Documents/Node-Syncing-Data/Part 4/src/server.js",
 			// Automatically stop program after launch.
 			"stopOnEntry": false,
 			// Command line arguments passed to the program.
